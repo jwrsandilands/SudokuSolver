@@ -31,4 +31,15 @@ public class GridController {
             System.out.println();
         }
     }
+
+    public void CalculateCellAnswers(int row, int column){
+        int[] sectorCoords = new int[2];
+        sectorCoords[0] = column/3;
+        sectorCoords[1] = row/3;
+
+        System.out.println("Your Cell Number is:");
+        System.out.println(grid[column][row]);
+        System.out.println("Your Cell Sector is:");
+        System.out.println(sectorCoords[0] + " " + sectorCoords[1]);
+    }
 }

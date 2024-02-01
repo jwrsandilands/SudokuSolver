@@ -14,5 +14,9 @@ public class ApplicationController {
         game.GenerateGrid();
 
         game.PrintGrid();
+
+        game.CalculateCellAnswers(0, 0);
+        game.CalculateCellAnswers(3, 4);
+        game.CalculateCellAnswers(7, 6);
     }
 }
