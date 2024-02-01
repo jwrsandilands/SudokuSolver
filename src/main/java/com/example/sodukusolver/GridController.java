@@ -1,13 +1,15 @@
 package com.example.sodukusolver;
 
 public class GridController {
-    public static SudokuGrid[] grid;
-    public static void GenerateGrid(){
-        SudokuGrid[] newRow= new SudokuGrid[9];
+    public int[][] grid;
 
-        for(int i = 0; i < newRow.length; i++){
-            newRow[i].setCell(1);
+    public void GenerateGrid(){
+        grid = new int[9][9];
+
+        for(int i = 0; i < grid.length; i++){
+            for(int j = 0; j < grid.length; j++){
+                grid[i][j] = 1;
+            }
         }
-        grid = newRow;
     }
 }
