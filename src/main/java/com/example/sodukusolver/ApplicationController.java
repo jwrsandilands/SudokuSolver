@@ -13,6 +13,6 @@ public class ApplicationController {
         GridController game = new GridController();
         game.GenerateGrid();
 
-        System.out.println(game.grid);
+        game.PrintGrid();
     }
 }
