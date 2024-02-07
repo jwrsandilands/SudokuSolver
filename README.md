@@ -37,4 +37,4 @@ Note: You cannot change the numbers that were originally set in the grid on crea
 ## Check Solve-ability
 
 This function uses a hardcoded string (by default the exact same string of numbers as the generate function) and will test if the grid can ever be solved.
-This also doubles up as a way to check if a solved grid is actually valid.
+This also doubles up as a way to check if a solved grid is actually valid. This is also outputted to the window, rather than the console.
