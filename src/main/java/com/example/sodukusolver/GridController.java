@@ -1,7 +1,10 @@
 package com.example.sodukusolver;
 
+import java.util.Vector;
+
 public class GridController {
     public int[][] grid;
+    private Vector<NumberHint> hints = new Vector<>();
 
     public void GenerateGrid(){
         grid = new int[9][9];
@@ -39,8 +42,10 @@ public class GridController {
 
         int sector = FindCellSector(row, column);
 
-        for(int number = 1; number < 9; number++){
-            CheckSectorForNumber(sector, number);
+        boolean foundNumber = false;
+        for(int number = 1; number <= 9; number++){
+            foundNumber = CheckSectorForNumber(sector, number);
+            hints.add(new NumberHint(number, foundNumber));
         }
     }
 
@@ -70,28 +75,78 @@ public class GridController {
     }
 
     public boolean CheckSectorForNumber(int sector, int number){
+        boolean numberFound = false;
+        int rowStart = 0, rowEnd = 2;
+        int colStart = 0, colEnd = 2;
+
         switch(sector){
             case 1:
+                rowStart = 0;
+                rowEnd = 2;
+                colStart = 0;
+                colEnd = 2;
                 break;
             case 2:
+                rowStart = 0;
+                rowEnd = 2;
+                colStart = 3;
+                colEnd = 5;
                 break;
             case 3:
+                rowStart = 0;
+                rowEnd = 2;
+                colStart = 6;
+                colEnd = 8;
                 break;
             case 4:
+                rowStart = 3;
+                rowEnd = 5;
+                colStart = 0;
+                colEnd = 2;
                 break;
             case 5:
+                rowStart = 3;
+                rowEnd = 5;
+                colStart = 3;
+                colEnd = 5;
                 break;
             case 6:
+                rowStart = 3;
+                rowEnd = 5;
+                colStart = 6;
+                colEnd = 8;
                 break;
             case 7:
+                rowStart = 6;
+                rowEnd = 8;
+                colStart = 0;
+                colEnd = 2;
                 break;
             case 8:
+                rowStart = 6;
+                rowEnd = 8;
+                colStart = 3;
+                colEnd = 5;
                 break;
             case 9:
+                rowStart = 6;
+                rowEnd = 8;
+                colStart = 6;
+                colEnd = 8;
                 break;
             default:
                 break;
         }
-        return false;
+
+        for(int row = rowStart; row <= rowEnd; row++){
+            for(int column = colStart; column <= colEnd; column++){
+                if (grid[row][column] == number) {
+                    numberFound = true;
+                    break;
+                }
+            }
+        }
+
+        return numberFound;
     }
 }
