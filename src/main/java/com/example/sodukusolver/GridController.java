@@ -8,7 +8,6 @@ public class GridController {
 
     public void generateGrid(){
         grid = new int[9][9];
-        gridHints.clear();
 
         String numbers = "570010048081600075009700201094008102802106004060007890000073080308009000950840000";
         int cellCounter = 0;
@@ -24,7 +23,7 @@ public class GridController {
     }
 
     public void printGrid(){
-        System.out.println("Your Generated Grid is:");
+        System.out.println("Your Grid is now:");
         for (int[] rows : grid) {
             for (int cell : rows) {
                 if(cell == 0){
@@ -79,6 +78,7 @@ public class GridController {
     }
 
     private void calculateAndCompileHints(){
+        gridHints.clear();
         for(int row = 0; row <= 8; row++){
             Vector<Vector<NumberHint>> rowHints = new Vector<>();
             for(int column = 0; column <= 8; column++){
@@ -88,12 +88,18 @@ public class GridController {
         }
     }
 
-    public boolean validateMove(int input, int row, int column){
+    public boolean playMove(int input, int row, int column){
+        grid[row][column] = input;
+        printGrid();
+
+        boolean isValid = validateMove(input, row, column);
+        return isValid;
+    }
+
+    private boolean validateMove(int input, int row, int column){
         boolean isValid = false;
         Vector<Vector<NumberHint>> hintRow = gridHints.get(row);
         Vector<NumberHint> hintCell = hintRow.get(column);
-
-        NumberHint guess = new NumberHint(input, true);
 
         if(hintCell.stream().anyMatch(e -> (e.checkedNumber == input) && (e.possibleNumber))){
             isValid = true;
