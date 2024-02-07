@@ -40,16 +40,36 @@ public class GridController {
             System.out.println("Your Cell Number is: " + grid[column][row]);
         }
 
-        int sector = FindCellSector(row, column);
+        CalculateCellHints(row, column);
+    }
 
-        boolean foundNumber = false;
+    public void CalculateCellHints(int column, int row){
+        if(grid[row][column] != 0){
+            System.out.println("Your Cell Number is: " + grid[row][column]);
+        }
+
+        int sector = FindCellSector(column, row);
+
+        boolean possibleNumber = false;
         for(int number = 1; number <= 9; number++){
-            foundNumber = CheckSectorForNumber(sector, number);
-            hints.add(new NumberHint(number, foundNumber));
+            if(number == grid[row][column]){
+                possibleNumber = true;
+            }
+            else{
+                possibleNumber = !(CheckSectorForNumber(sector, number) || CheckRowForNumber(row, number) || CheckColumnForNumber(column, number));
+            }
+            hints.add(new NumberHint(number, possibleNumber));
+        }
+
+        System.out.println("The numbers that can go in this cell are: ");
+        for(NumberHint hint : hints){
+            if(hint.possibleNumber){
+                System.out.print(hint.checkedNumber + " ");
+            }
         }
     }
 
-    public int FindCellSector(int row, int column){
+    private int FindCellSector(int row, int column){
         int[] sectorCoords = new int[2];
         sectorCoords[0] = column/3;
         sectorCoords[1] = row/3;
@@ -74,10 +94,10 @@ public class GridController {
         return count;
     }
 
-    public boolean CheckSectorForNumber(int sector, int number){
+    private boolean CheckSectorForNumber(int sector, int number){
         boolean numberFound = false;
-        int rowStart = 0, rowEnd = 2;
-        int colStart = 0, colEnd = 2;
+        int rowStart, rowEnd ;
+        int colStart, colEnd ;
 
         switch(sector){
             case 1:
@@ -135,6 +155,10 @@ public class GridController {
                 colEnd = 8;
                 break;
             default:
+                rowStart = 0;
+                rowEnd = 0;
+                colStart = 0;
+                colEnd = 0;
                 break;
         }
 
@@ -144,6 +168,32 @@ public class GridController {
                     numberFound = true;
                     break;
                 }
+            }
+        }
+
+        return numberFound;
+    }
+
+    private boolean CheckRowForNumber(int row,int number){
+        boolean numberFound = false;
+
+        for(int column = 0; column < 9; column++){
+            if(grid[row][column] == number){
+                numberFound = true;
+                break;
+            }
+        }
+
+        return numberFound;
+    }
+
+    private boolean CheckColumnForNumber(int column,int number){
+        boolean numberFound = false;
+
+        for(int row = 0; row < 9; row++){
+            if(grid[row][column] == number){
+                numberFound = true;
+                break;
             }
         }
 

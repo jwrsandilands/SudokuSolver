@@ -15,8 +15,6 @@ public class ApplicationController {
 
         game.PrintGrid();
 
-/*        game.CalculateCellAnswers(0, 0);*/
-        game.CalculateCellAnswers(0, 4);
-/*        game.CalculateCellAnswers(7, 6);*/
+        game.CalculateCellHints(3, 5);
     }
 }
