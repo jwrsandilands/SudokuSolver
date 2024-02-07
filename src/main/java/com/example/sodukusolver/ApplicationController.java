@@ -20,13 +20,16 @@ public class ApplicationController {
     private TextField XTextField;
     @FXML
     private TextField YTextField;
+    @FXML
+    private Label generateSolvedButtonLabel;
 
     @FXML
     protected void OnGenerateButtonClick() {
         generateButtonLabel.setText("Generated Grid in your Console!");
         playButton.setDisable(false);
 
-        game.generateGrid();
+        String numbers = "570010048081600075009700201094008102802106004060007890000073080308009000950840000";
+        game.generateGrid(numbers);
 
         game.printGrid();
     }
@@ -50,5 +53,24 @@ public class ApplicationController {
         } else {
             playButtonLabel.setText("Move was invalid!");
         }
+    }
+
+    @FXML
+    protected void OnGenerateSolvedButtonClick(){
+        playButton.setDisable(false);
+
+        String numbers = "570010048081600075009700201094008102802106004060007890000073080308009000950840000";
+        game.generateGrid(numbers);
+
+        game.printGrid();
+
+        boolean validSolution = game.validateCompleteGrid();
+        if(validSolution){
+            generateSolvedButtonLabel.setText("Grid is in Solvable State");
+        }
+        else{
+            generateSolvedButtonLabel.setText("Grid isn't Solvable!");
+        }
+
     }
 }

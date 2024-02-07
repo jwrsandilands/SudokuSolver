@@ -1,15 +1,16 @@
 package com.example.sodukusolver;
 
+import java.util.Arrays;
 import java.util.Vector;
 
 public class GridController {
     public int[][] grid;
+    public int[][] playGrid;
     Vector<Vector<Vector<NumberHint>>> gridHints = new Vector<>();
 
-    public void generateGrid(){
+    public void generateGrid(String numbers){
         grid = new int[9][9];
 
-        String numbers = "570010048081600075009700201094008102802106004060007890000073080308009000950840000";
         int cellCounter = 0;
 
         for(int row = 0; row < grid.length; row++){
@@ -19,12 +20,13 @@ public class GridController {
             }
         }
 
+        playGrid = grid.clone();
         calculateAndCompileHints();
     }
 
     public void printGrid(){
         System.out.println("Your Grid is now:");
-        for (int[] rows : grid) {
+        for (int[] rows : playGrid) {
             for (int cell : rows) {
                 if(cell == 0){
                     System.out.print(" " + "." + " ");
@@ -48,22 +50,18 @@ public class GridController {
     public Vector<NumberHint> calculateCellHints(int column, int row){
         Vector<NumberHint> hints = new Vector<>();
 
-        if(grid[row][column] != 0){
-            System.out.println("Your Cell Number is: " + grid[row][column]);
+        if(playGrid[row][column] != 0){
+            System.out.println("Your Cell Number is: " + playGrid[row][column]);
         }
 
         int sector = findCellSector(column, row);
 
         boolean possibleNumber;
         for(int number = 1; number <= 9; number++){
-            if(number == grid[row][column]){
-                possibleNumber = true;
-                hints.add(new NumberHint(number, possibleNumber));
-            }
-            else{
-                possibleNumber = !(checkSectorForNumber(sector, number) || checkRowForNumber(row, number) || checkColumnForNumber(column, number));
-                hints.add(new NumberHint(number, possibleNumber));
-            }
+            possibleNumber = !(checkSectorForNumber(sector, number, row, column)
+                            || checkRowForNumber(row, column, number)
+                            || checkColumnForNumber(row, column, number));
+            hints.add(new NumberHint(number, possibleNumber));
         }
 
         System.out.println("The numbers that can go in this cell are: ");
@@ -89,20 +87,49 @@ public class GridController {
     }
 
     public boolean playMove(int input, int row, int column){
-        grid[row][column] = input;
+        if((playGrid[row][column] == grid[row][column]) && (grid[row][column] != 0)){
+            return false;
+        }
+
+        playGrid[row][column] = input;
         printGrid();
 
-        boolean isValid = validateMove(input, row, column);
+        boolean isValid = validateMove(input, row, column, true);
         return isValid;
     }
 
-    private boolean validateMove(int input, int row, int column){
+    private boolean validateMove(int input, int row, int column, boolean recompileHints){
         boolean isValid = false;
         Vector<Vector<NumberHint>> hintRow = gridHints.get(row);
         Vector<NumberHint> hintCell = hintRow.get(column);
 
-        if(hintCell.stream().anyMatch(e -> (e.checkedNumber == input) && (e.possibleNumber))){
+        if((hintCell.stream().anyMatch(e -> (e.checkedNumber == input) && (e.possibleNumber))) || (grid[row][column] == 0)){
             isValid = true;
+            if(recompileHints){
+                calculateAndCompileHints();
+            }
+        }
+
+        return isValid;
+    }
+
+    public boolean validateCompleteGrid(){
+        boolean isValid = false;
+
+        int row = 0, column = 0;
+        for (int[] rows : playGrid) {
+            for (int cell : rows) {
+                isValid = validateMove(cell, row, column, false);
+                if(!isValid){
+                    break;
+                }
+                column++;
+            }
+            if(!isValid){
+                break;
+            }
+            column = 0;
+            row++;
         }
 
         return isValid;
@@ -133,7 +160,7 @@ public class GridController {
         return count;
     }
 
-    private boolean checkSectorForNumber(int sector, int number){
+    private boolean checkSectorForNumber(int sector, int number, int row, int column){
         boolean numberFound = false;
         int rowStart, rowEnd ;
         int colStart, colEnd ;
@@ -201,9 +228,9 @@ public class GridController {
                 break;
         }
 
-        for(int row = rowStart; row <= rowEnd; row++){
-            for(int column = colStart; column <= colEnd; column++){
-                if (grid[row][column] == number) {
+        for(int checkRow = rowStart; checkRow <= rowEnd; checkRow++){
+            for(int checkColumn = colStart; checkColumn <= colEnd; checkColumn++){
+                if ((playGrid[checkRow][checkColumn] == number) && (checkRow != row && checkColumn != column)) {
                     numberFound = true;
                     break;
                 }
@@ -213,11 +240,11 @@ public class GridController {
         return numberFound;
     }
 
-    private boolean checkRowForNumber(int row, int number){
+    private boolean checkRowForNumber(int row, int column, int number){
         boolean numberFound = false;
 
-        for(int column = 0; column < 9; column++){
-            if(grid[row][column] == number){
+        for(int checkColumn = 0; checkColumn < 9; checkColumn++){
+            if((playGrid[row][checkColumn] == number) && (checkColumn != column)){
                 numberFound = true;
                 break;
             }
@@ -226,11 +253,11 @@ public class GridController {
         return numberFound;
     }
 
-    private boolean checkColumnForNumber(int column, int number){
+    private boolean checkColumnForNumber(int row, int column, int number){
         boolean numberFound = false;
 
-        for(int row = 0; row < 9; row++){
-            if(grid[row][column] == number){
+        for(int checkRow = 0; checkRow < 9; checkRow++){
+            if((playGrid[checkRow][column] == number) && (checkRow != row)){
                 numberFound = true;
                 break;
             }
