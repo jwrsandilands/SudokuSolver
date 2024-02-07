@@ -59,17 +59,19 @@ public class ApplicationController {
     protected void OnGenerateSolvedButtonClick(){
         playButton.setDisable(false);
 
+        GridController testingGame = new GridController();
+
         String numbers = "570010048081600075009700201094008102802106004060007890000073080308009000950840000";
-        game.generateGrid(numbers);
+        testingGame.generateGrid(numbers);
 
-        game.printGrid();
+        testingGame.printGrid();
 
-        boolean validSolution = game.validateCompleteGrid();
+        boolean validSolution = testingGame.validateCompleteGrid();
         if(validSolution){
-            generateSolvedButtonLabel.setText("Grid is in Solvable State");
+            generateSolvedButtonLabel.setText("Testing Grid is in Solvable State");
         }
         else{
-            generateSolvedButtonLabel.setText("Grid isn't Solvable!");
+            generateSolvedButtonLabel.setText("Testing Grid isn't Solvable!");
         }
 
     }

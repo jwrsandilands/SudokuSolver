@@ -10,17 +10,18 @@ public class GridController {
 
     public void generateGrid(String numbers){
         grid = new int[9][9];
+        playGrid = new int[9][9];
 
         int cellCounter = 0;
 
         for(int row = 0; row < grid.length; row++){
             for(int column = 0; column < grid.length; column++){
                 grid[row][column] = Character.getNumericValue(numbers.toCharArray()[cellCounter]);
+                playGrid[row][column] = Character.getNumericValue(numbers.toCharArray()[cellCounter]);
                 cellCounter++;
             }
         }
 
-        playGrid = grid.clone();
         calculateAndCompileHints();
     }
 
@@ -87,14 +88,14 @@ public class GridController {
     }
 
     public boolean playMove(int input, int row, int column){
-        if((playGrid[row][column] == grid[row][column]) && (grid[row][column] != 0)){
+        if(grid[column][row] != 0){
             return false;
         }
 
-        playGrid[row][column] = input;
+        playGrid[column][row] = input;
         printGrid();
 
-        boolean isValid = validateMove(input, row, column, true);
+        boolean isValid = validateMove(input, column, row, false);
         return isValid;
     }
 
@@ -103,7 +104,7 @@ public class GridController {
         Vector<Vector<NumberHint>> hintRow = gridHints.get(row);
         Vector<NumberHint> hintCell = hintRow.get(column);
 
-        if((hintCell.stream().anyMatch(e -> (e.checkedNumber == input) && (e.possibleNumber))) || (grid[row][column] == 0)){
+        if((hintCell.stream().anyMatch(e -> (e.checkedNumber == input) && (e.possibleNumber))) || (playGrid[row][column] == 0)){
             isValid = true;
             if(recompileHints){
                 calculateAndCompileHints();
