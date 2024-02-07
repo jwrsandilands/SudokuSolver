@@ -11,10 +11,10 @@ public class ApplicationController {
     protected void OnGenerateButtonClick() {
         generateButtonLabel.setText("Generated Grid in your Console!");
         GridController game = new GridController();
-        game.GenerateGrid();
+        game.generateGrid();
 
-        game.PrintGrid();
+        game.printGrid();
 
-        game.CalculateCellHints(3, 5);
+        System.out.println(game.validateMove(4, 0, 2));
     }
 }
