@@ -55,6 +55,8 @@ public class GridController {
             System.out.println("Your Cell Number is: " + playGrid[row][column]);
         }
 
+        //put threads in here somewhere
+
         int sector = findCellSector(column, row);
 
         boolean possibleNumber;
@@ -88,14 +90,14 @@ public class GridController {
     }
 
     public boolean playMove(int input, int row, int column){
-        if(grid[column][row] != 0){
+        if(grid[row][column] != 0){
             return false;
         }
 
-        playGrid[column][row] = input;
+        playGrid[row][column] = input;
         printGrid();
 
-        boolean isValid = validateMove(input, column, row, false);
+        boolean isValid = validateMove(input, row, column, false);
         return isValid;
     }
 
