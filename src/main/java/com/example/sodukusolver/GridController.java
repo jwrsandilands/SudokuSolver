@@ -45,25 +45,45 @@ public class GridController {
             System.out.println("Your Cell Number is: " + grid[row][column]);
         }
 
-        calculateCellHints(column, row);
+        try {
+            calculateCellHints(column, row);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public Vector<NumberHint> calculateCellHints(int column, int row){
+    public Vector<NumberHint> calculateCellHints(int column, int row) throws InterruptedException {
         Vector<NumberHint> hints = new Vector<>();
 
         if(playGrid[row][column] != 0){
             System.out.println("Your Cell Number is: " + playGrid[row][column]);
         }
 
-        //put threads in here somewhere
-
         int sector = findCellSector(column, row);
 
         boolean possibleNumber;
         for(int number = 1; number <= 9; number++){
-            possibleNumber = !(checkSectorForNumber(sector, number, row, column)
-                            || checkRowForNumber(row, column, number)
-                            || checkColumnForNumber(row, column, number));
+            int finalNumber = number;
+
+            AsyncSectorCheck sectorCheck = new AsyncSectorCheck(sector, finalNumber, row, column, playGrid);
+            AsyncRowCheck rowCheck = new AsyncRowCheck(row, column, finalNumber, playGrid);
+            AsyncColumnCheck columnCheck = new AsyncColumnCheck(row, column, finalNumber, playGrid);
+
+            final var t1 = new Thread(() -> sectorCheck.checkSectorForNumber());
+            final var t2 = new Thread(() -> rowCheck.checkRowForNumber());
+            final var t3 = new Thread(() -> columnCheck.checkColumnForNumber());
+
+            t1.start();
+            t2.start();
+            t3.start();
+
+            t1.join();
+            t2.join();
+            t3.join();
+
+            possibleNumber = ! (sectorCheck.getAnswer()
+                            || rowCheck.getAnswer()
+                            || columnCheck.getAnswer());
             hints.add(new NumberHint(number, possibleNumber));
         }
 
@@ -83,7 +103,11 @@ public class GridController {
         for(int row = 0; row <= 8; row++){
             Vector<Vector<NumberHint>> rowHints = new Vector<>();
             for(int column = 0; column <= 8; column++){
-                rowHints.add(calculateCellHints(column, row));
+                try {
+                    rowHints.add(calculateCellHints(column, row));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
             gridHints.add(rowHints);
         }
