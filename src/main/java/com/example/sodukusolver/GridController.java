@@ -6,6 +6,19 @@ import java.util.Vector;
 public class GridController {
     public int[][] grid;
     public int[][] playGrid;
+
+    public final SectorBounds[] sectorBoundsArray = {
+            new SectorBounds(0 ,2, 0, 2),
+            new SectorBounds(0 ,2, 3, 5),
+            new SectorBounds(0 ,2, 6, 8),
+            new SectorBounds(3 ,5, 0, 2),
+            new SectorBounds(3 ,5, 3, 5),
+            new SectorBounds(3 ,5, 6, 8),
+            new SectorBounds(6 ,8, 0, 2),
+            new SectorBounds(6 ,8, 3, 5),
+            new SectorBounds(6 ,8, 6, 8),
+    };
+
     Vector<Vector<Vector<NumberHint>>> gridHints = new Vector<>();
 
     public void generateGrid(String numbers){
@@ -45,10 +58,14 @@ public class GridController {
             System.out.println("Your Cell Number is: " + grid[row][column]);
         }
 
-        calculateCellHints(column, row);
+        try {
+            calculateCellHints(column, row);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public Vector<NumberHint> calculateCellHints(int column, int row){
+    public Vector<NumberHint> calculateCellHints(int column, int row) throws InterruptedException {
         Vector<NumberHint> hints = new Vector<>();
 
         if(playGrid[row][column] != 0){
@@ -59,9 +76,27 @@ public class GridController {
 
         boolean possibleNumber;
         for(int number = 1; number <= 9; number++){
-            possibleNumber = !(checkSectorForNumber(sector, number, row, column)
-                            || checkRowForNumber(row, column, number)
-                            || checkColumnForNumber(row, column, number));
+            int finalNumber = number;
+
+            AsyncSectorCheck sectorCheck = new AsyncSectorCheck(sector, finalNumber, row, column, playGrid);
+            AsyncRowCheck rowCheck = new AsyncRowCheck(row, column, finalNumber, playGrid);
+            AsyncColumnCheck columnCheck = new AsyncColumnCheck(row, column, finalNumber, playGrid);
+
+            final var t1 = new Thread(() -> sectorCheck.checkSectorForNumber());
+            final var t2 = new Thread(() -> rowCheck.checkRowForNumber());
+            final var t3 = new Thread(() -> columnCheck.checkColumnForNumber());
+
+            t1.start();
+            t2.start();
+            t3.start();
+
+            t1.join();
+            t2.join();
+            t3.join();
+
+            possibleNumber = ! (sectorCheck.getAnswer()
+                            || rowCheck.getAnswer()
+                            || columnCheck.getAnswer());
             hints.add(new NumberHint(number, possibleNumber));
         }
 
@@ -81,21 +116,25 @@ public class GridController {
         for(int row = 0; row <= 8; row++){
             Vector<Vector<NumberHint>> rowHints = new Vector<>();
             for(int column = 0; column <= 8; column++){
-                rowHints.add(calculateCellHints(column, row));
+                try {
+                    rowHints.add(calculateCellHints(column, row));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
             gridHints.add(rowHints);
         }
     }
 
     public boolean playMove(int input, int row, int column){
-        if(grid[column][row] != 0){
+        if(grid[row][column] != 0){
             return false;
         }
 
-        playGrid[column][row] = input;
+        playGrid[row][column] = input;
         printGrid();
 
-        boolean isValid = validateMove(input, column, row, false);
+        boolean isValid = validateMove(input, row, column, false);
         return isValid;
     }
 
@@ -163,74 +202,11 @@ public class GridController {
 
     private boolean checkSectorForNumber(int sector, int number, int row, int column){
         boolean numberFound = false;
-        int rowStart, rowEnd ;
-        int colStart, colEnd ;
 
-        switch(sector){
-            case 1:
-                rowStart = 0;
-                rowEnd = 2;
-                colStart = 0;
-                colEnd = 2;
-                break;
-            case 2:
-                rowStart = 0;
-                rowEnd = 2;
-                colStart = 3;
-                colEnd = 5;
-                break;
-            case 3:
-                rowStart = 0;
-                rowEnd = 2;
-                colStart = 6;
-                colEnd = 8;
-                break;
-            case 4:
-                rowStart = 3;
-                rowEnd = 5;
-                colStart = 0;
-                colEnd = 2;
-                break;
-            case 5:
-                rowStart = 3;
-                rowEnd = 5;
-                colStart = 3;
-                colEnd = 5;
-                break;
-            case 6:
-                rowStart = 3;
-                rowEnd = 5;
-                colStart = 6;
-                colEnd = 8;
-                break;
-            case 7:
-                rowStart = 6;
-                rowEnd = 8;
-                colStart = 0;
-                colEnd = 2;
-                break;
-            case 8:
-                rowStart = 6;
-                rowEnd = 8;
-                colStart = 3;
-                colEnd = 5;
-                break;
-            case 9:
-                rowStart = 6;
-                rowEnd = 8;
-                colStart = 6;
-                colEnd = 8;
-                break;
-            default:
-                rowStart = 0;
-                rowEnd = 0;
-                colStart = 0;
-                colEnd = 0;
-                break;
-        }
+        SectorBounds sectorBounds = sectorBoundsArray[sector - 1];
 
-        for(int checkRow = rowStart; checkRow <= rowEnd; checkRow++){
-            for(int checkColumn = colStart; checkColumn <= colEnd; checkColumn++){
+        for(int checkRow = sectorBounds.rowStart; checkRow <= sectorBounds.rowEnd; checkRow++){
+            for(int checkColumn = sectorBounds.colStart; checkColumn <= sectorBounds.colEnd; checkColumn++){
                 if ((playGrid[checkRow][checkColumn] == number) && (checkRow != row && checkColumn != column)) {
                     numberFound = true;
                     break;
