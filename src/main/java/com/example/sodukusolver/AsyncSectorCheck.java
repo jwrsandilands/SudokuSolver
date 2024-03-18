@@ -8,6 +8,18 @@ public class AsyncSectorCheck {
     private final int[][] playGrid;
     private boolean answer;
 
+    private final SectorBounds[] sectorBoundsArray = {
+            new SectorBounds(0 ,2, 0, 2),
+            new SectorBounds(0 ,2, 3, 5),
+            new SectorBounds(0 ,2, 6, 8),
+            new SectorBounds(3 ,5, 0, 2),
+            new SectorBounds(3 ,5, 3, 5),
+            new SectorBounds(3 ,5, 6, 8),
+            new SectorBounds(6 ,8, 0, 2),
+            new SectorBounds(6 ,8, 3, 5),
+            new SectorBounds(6 ,8, 6, 8),
+    };
+
     AsyncSectorCheck(int sector, int number, int row, int column, int[][] playGrid){
         this.sector = sector;
         this.number = number;
@@ -18,74 +30,11 @@ public class AsyncSectorCheck {
 
     public synchronized void checkSectorForNumber(){
         boolean numberFound = false;
-        int rowStart, rowEnd ;
-        int colStart, colEnd ;
 
-        switch(sector){
-            case 1:
-                rowStart = 0;
-                rowEnd = 2;
-                colStart = 0;
-                colEnd = 2;
-                break;
-            case 2:
-                rowStart = 0;
-                rowEnd = 2;
-                colStart = 3;
-                colEnd = 5;
-                break;
-            case 3:
-                rowStart = 0;
-                rowEnd = 2;
-                colStart = 6;
-                colEnd = 8;
-                break;
-            case 4:
-                rowStart = 3;
-                rowEnd = 5;
-                colStart = 0;
-                colEnd = 2;
-                break;
-            case 5:
-                rowStart = 3;
-                rowEnd = 5;
-                colStart = 3;
-                colEnd = 5;
-                break;
-            case 6:
-                rowStart = 3;
-                rowEnd = 5;
-                colStart = 6;
-                colEnd = 8;
-                break;
-            case 7:
-                rowStart = 6;
-                rowEnd = 8;
-                colStart = 0;
-                colEnd = 2;
-                break;
-            case 8:
-                rowStart = 6;
-                rowEnd = 8;
-                colStart = 3;
-                colEnd = 5;
-                break;
-            case 9:
-                rowStart = 6;
-                rowEnd = 8;
-                colStart = 6;
-                colEnd = 8;
-                break;
-            default:
-                rowStart = 0;
-                rowEnd = 0;
-                colStart = 0;
-                colEnd = 0;
-                break;
-        }
+        SectorBounds sectorBounds = sectorBoundsArray[sector - 1];
 
-        for(int checkRow = rowStart; checkRow <= rowEnd; checkRow++){
-            for(int checkColumn = colStart; checkColumn <= colEnd; checkColumn++){
+        for(int checkRow = sectorBounds.rowStart; checkRow <= sectorBounds.rowEnd; checkRow++){
+            for(int checkColumn = sectorBounds.colStart; checkColumn <= sectorBounds.colEnd; checkColumn++){
                 if ((playGrid[checkRow][checkColumn] == number) && (checkRow != row && checkColumn != column)) {
                     numberFound = true;
                     break;
